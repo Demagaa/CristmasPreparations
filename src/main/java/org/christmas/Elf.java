@@ -1,33 +1,53 @@
 package org.christmas;
 
+import java.util.concurrent.Semaphore;
+
 /**
  * @author Aleksei Chursin
  */
 public class Elf implements Runnable{
     int id;
     int time;
+    Semaphore sem;
+    private final Semaphore santaSemaphore;
+    private final Semaphore elfSemaphore;
 
-    public Elf(int id) {
+    Santa santa;
+
+    public Elf(int id, Semaphore santaSemaphore, Semaphore elfSemaphore) {
         this.id = id;
         this.time = (int) Math.random()*100;
+        this.santaSemaphore = santaSemaphore;
+        this.elfSemaphore = elfSemaphore;
+
     }
 
     @Override
     public void run() {
-        System.out.println("Elf " + id + ": started");
-        synchronized (this) {
+        while (true) {
             try {
-                wait(time);
+                System.out.println("Av perms: " + elfSemaphore.availablePermits());
+
+                System.out.println("Elf " + id + ": started");
+
+                elfSemaphore.acquireUninterruptibly();
+
+                Thread.sleep(time);
+
+                if (elfSemaphore.availablePermits() == 0) {
+                    getHelp();
+                }
+
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            System.out.println("Elf " + id + ": need help");
-
         }
     }
 
+
     public void getHelp(){
-        System.out.println("Elf " + id + ": get help ");
+        System.out.println("Elf " + id + ": need help ");
+        santaSemaphore.release();
     }
 
     public void holidays(){
