@@ -7,5 +7,5 @@ Java 17
 
 ## Project status
 
-actively developing
+improving
 
